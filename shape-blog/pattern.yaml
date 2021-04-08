@@ -1,0 +1,7 @@
+name: Shape Blog
+description: A simple blog site.
+color: "#61dafb"
+icon: pen-tool
+categories:
+  - examples
+  - quickstart
