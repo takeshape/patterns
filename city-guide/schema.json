@@ -1,0 +1,284 @@
+{
+  "workflows": {},
+  "apiVersion": "2",
+  "defaultLocale": "en",
+  "locales": ["en"],
+  "projectId": "90ddca81-5e73-44a9-af20-c2555cebf7e9",
+  "version": 4,
+  "schemaVersion": "3",
+  "queries": {
+    "getLocation": {
+      "shape": "IPLookupResult",
+      "resolver": {
+        "resultsMapping": {
+          "location": [["get", { "path": "results.location" }]],
+          "weather": [["get", { "path": "results.weather" }]],
+          "business": [["get", { "path": "results.yelp.business" }]]
+        },
+        "compose": [
+          {
+            "id": "location",
+            "name": "rest:get",
+            "service": "ip-api",
+            "options": {
+              "path": "json/:ip"
+            },
+            "argsMapping": {
+              "pathParams.ip": [
+                [
+                  "get",
+                  {
+                    "path": "args.ip"
+                  }
+                ]
+              ],
+              "searchParams": [
+                [
+                  "set",
+                  {
+                    "value": {
+                      "fields": "status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,query"
+                    }
+                  }
+                ]
+              ]
+            }
+          },
+          {
+            "id": "weather",
+            "name": "rest:get",
+            "service": "openweathermap",
+            "argsMapping": {
+              "searchParams.zip": [["get", { "path": "results.location.zip" }]],
+              "searchParams.units": [["set", { "value": "imperial" }]]
+            },
+            "options": {
+              "path": "weather"
+            }
+          },
+          {
+            "id": "yelp",
+            "name": "graphql:query",
+            "service": "yelp",
+            "argsMapping": {
+              "location": [["get", { "path": "results.location.zip" }]],
+              "term": [["set", { "value": "restaurant" }]],
+              "limit": [["set", { "value": 5 }]]
+            },
+            "options": {
+              "fieldName": "search",
+              "selectionSet": "{ total business { name url } }"
+            }
+          }
+        ]
+      },
+      "description": "Returns a location.",
+      "args": "LocationInput"
+    }
+  },
+  "mutations": {},
+  "shapes": {
+    "LocationInput": {
+      "id": "LocationInput",
+      "name": "LocationInput",
+      "title": "LocationInput",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "ip": {
+            "type": "string"
+          }
+        },
+        "required": ["ip"]
+      }
+    },
+    "Location": {
+      "id": "Location",
+      "name": "Location",
+      "title": "Location",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "countryCode": {
+            "type": "string",
+            "title": "Country Code"
+          },
+          "region": {
+            "type": "string",
+            "title": "Region"
+          },
+          "regionName": {
+            "type": "string",
+            "title": "Region Name"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          },
+          "zip": {
+            "type": "string",
+            "title": "Zip"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          }
+        }
+      }
+    },
+    "WeatherInfo": {
+      "id": "WeatherInfo",
+      "name": "WeatherInfo",
+      "title": "WeatherInfo",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "main": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Weather": {
+      "id": "Weather",
+      "name": "Weather",
+      "title": "Weather",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "weather": {
+            "type": "array",
+            "items": {
+              "@ref": "local:WeatherInfo"
+            }
+          }
+        }
+      }
+    },
+    "Business": {
+      "id": "Business",
+      "name": "Business",
+      "title": "Business",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "YelpSearchResult": {
+      "id": "YelpSearchResult",
+      "name": "YelpSearchResult",
+      "title": "YelpSearchResult",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "business": {
+            "type": "array",
+            "items": {
+              "@ref": "local:Business"
+            }
+          }
+        }
+      }
+    },
+    "IPLookupResult": {
+      "id": "IPLookupResult",
+      "name": "IPLookupResult",
+      "title": "IPLookupResult",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "@ref": "local:Location"
+          },
+          "business": {
+            "type": "array",
+            "items": {
+              "@ref": "local:Business"
+            }
+          },
+          "weather": {
+            "@ref": "local:Weather"
+          }
+        }
+      }
+    }
+  },
+  "created": "2017-07-13T19:16:10.801Z",
+  "updated": "2020-11-02T19:18:41.453Z",
+  "forms": {},
+  "services": {
+    "googleplaces": {
+      "params": {
+        "endpoint": "https://maps.googleapis.com/maps/api/place",
+        "namespace": "GooglePlaces",
+        "name": "googleplaces",
+        "type": "rest",
+        "authType": "searchParams",
+        "authProp": "key"
+      }
+    },
+    "yelp": {
+      "params": {
+        "endpoint": "https://api.yelp.com/v3/graphql",
+        "namespace": "Yelp",
+        "name": "yelp",
+        "type": "graphql"
+      }
+    },
+    "openweathermap": {
+      "params": {
+        "type": "rest",
+        "name": "openweathermap",
+        "endpoint": "https://api.openweathermap.org/data/2.5",
+        "authType": "searchParams",
+        "authProp": "appid"
+      }
+    },
+    "ip-api": {
+      "params": {
+        "authType": "none",
+        "name": "ip-api",
+        "type": "rest",
+        "endpoint": "http://ip-api.com/"
+      }
+    }
+  }
+}
