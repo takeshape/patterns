@@ -9,6 +9,14 @@ The schema that lets you (virtually) pull a rabbit out of your hat.
 - [Twilio](https://www.twilio.com/docs/sms/api)
 - [PetFinder](https://www.petfinder.com/developers/v2/docs/)
 
+## Usage
+
+1. Set up a Twilio account on Twilio and add your credentials and personal endpoint to the service provided by this pattern in the TakeShape UI. The endpoint will appear in your Twilio account and look something like this: `https://api.twilio.com/2010-04-01/Accounts/ACcc8cb2cb9c1a99f454926ed7e7f09e01`
+2. Set up a Petfinder account on Petfinder and add your credentials to the service provided by this pattern in the TakeShape UI.
+3. In Twilio, approve the phone number you want to use for the `to` input in `checkSleeve` above.
+4. Use your Twilio assigned phone number for the `from` input above.
+5. Run the query below in the TakeShape API explorer with those two phone numbers substituted. You should receive a text at the `to` number with a rabbit.
+
 ## Story
 
 This schema makes use of TakeShape's ability to pipe and manipulate data between APIs
