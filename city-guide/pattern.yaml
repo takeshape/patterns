@@ -1,0 +1,8 @@
+name: City Guide
+description: "An IP-based city guide."
+color: "#FE6649"
+icon: "map-pin"
+categories:
+  - location
+  - weather
+  - directory
