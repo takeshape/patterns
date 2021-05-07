@@ -1,0 +1,184 @@
+{
+  "projectId": "",
+  "apiVersion": "2",
+  "version": 3,
+  "created": "2021-05-04T18:28:04.662Z",
+  "updated": "2021-05-04T18:50:27.746Z",
+  "defaultLocale": "en-us",
+  "locales": ["en-us"],
+  "schemaVersion": "3.1.0",
+  "queries": {},
+  "mutations": {
+    "checkSleeve": {
+      "shape": "Magic",
+      "resolver": {
+        "resultsMapping": {
+          "rabbit": [["get", {"path": "results.random-rabbit.animals[0]"}]],
+          "message": [["get", {"path": "results.twilio"}]]
+        },
+        "compose": [
+          {
+            "id": "random-rabbit",
+            "name": "rest:get",
+            "service": "petfinder",
+            "argsMapping": {
+              "searchParams.type": [
+                [
+                  "set",
+                  {
+                    "value": "rabbit"
+                  }
+                ]
+              ],
+              "searchParams.status": [
+                [
+                  "set",
+                  {
+                    "value": "adoptable"
+                  }
+                ]
+              ],
+              "searchParams.limit": [
+                [
+                  "set",
+                  {
+                    "value": 1
+                  }
+                ]
+              ],
+              "searchParams.page": [
+                [
+                  "expressionEval",
+                  {
+                    "expression": "random(1, 2000)"
+                  }
+                ]
+              ]
+            },
+            "options": {
+              "path": "animals"
+            }
+          },
+          {
+            "id": "twilio",
+            "name": "rest:post",
+            "service": "twilio",
+            "argsMapping": {
+              "form.Body": [
+                [
+                  "expressionEval",
+                  {
+                    "expression": "format('Meet %s! Adopt this bunny at: %s', get('random-rabbit.animals[0].name', results), get('random-rabbit.animals[0].url', results))"
+                  }
+                ]
+              ],
+              "form.From": [["set", {"value": "args.from"}]],
+              "form.To": [["get", {"path": "args.to"}]],
+              "form.MediaUrl": [
+                [
+                  "get",
+                  {
+                    "path": "results.random-rabbit.animals[0].photos[0].large"
+                  }
+                ]
+              ]
+            },
+            "options": {
+              "path": "Messages.json"
+            }
+          }
+        ]
+      },
+      "description": "Returns a location.",
+      "args": "MagicInput"
+    }
+  },
+  "shapes": {
+    "Magic": {
+      "id": "Magic",
+      "name": "Magic",
+      "title": "Magic",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "rabbit": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "age": {
+                "type": "string"
+              },
+              "gender": {
+                "type": "string"
+              },
+              "size": {
+                "type": "string"
+              }
+            }
+          },
+          "message": {
+            "type": "object",
+            "properties": {
+              "to": {
+                "type": "string"
+              },
+              "from": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "MagicInput": {
+      "id": "MagicInput",
+      "name": "MagicInput",
+      "title": "MagicInput",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          }          
+        }
+      }
+    }
+  },
+  "workflows": {},
+  "forms": {},
+  "services": {
+    "petfinder": {
+      "id": "petfinder",
+      "provider": "petfinder",
+      "title": "Petfinder",
+      "namespace": "Petfinder",
+      "serviceType": "rest",
+      "authenticationType": "oauth2",
+      "options": {
+        "endpoint": "https://api.petfinder.com/v2/"
+      }
+    },
+    "twilio": {
+      "id": "twilio",
+      "provider": "generic",
+      "title": "Twilio",
+      "namespace": "Twilio",
+      "serviceType": "rest",
+      "authenticationType": "basic"
+    }
+  }
+}

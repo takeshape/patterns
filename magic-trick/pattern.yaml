@@ -1,0 +1,7 @@
+name: Magic Trick
+description: "A magic trick!"
+color: "#a389f9"
+icon: "zap"
+categories:
+  - magic
+  - bunnies
