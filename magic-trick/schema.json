@@ -1,33 +1,57 @@
 {
-  "workflows": {},
+  "projectId": "",
   "apiVersion": "2",
-  "defaultLocale": "en",
-  "locales": ["en"],
-  "projectId": "90ddca81-5e73-44a9-af20-c2555cebf7e9",
-  "version": 4,
-  "schemaVersion": "3",
+  "version": 3,
+  "created": "2021-05-04T18:28:04.662Z",
+  "updated": "2021-05-04T18:50:27.746Z",
+  "defaultLocale": "en-us",
+  "locales": ["en-us"],
+  "schemaVersion": "3.1.0",
   "queries": {},
   "mutations": {
     "checkSleeve": {
       "shape": "Magic",
       "resolver": {
         "resultsMapping": {
-          "bunny": [["get", { "path": "results.random-animal.animals[0]" }]],
-          "message": [["get", { "path": "results.twilio" }]]
+          "rabbit": [["get", {"path": "results.random-rabbit.animals[0]"}]],
+          "message": [["get", {"path": "results.twilio"}]]
         },
         "compose": [
           {
-            "id": "random-animal",
+            "id": "random-rabbit",
             "name": "rest:get",
             "service": "petfinder",
             "argsMapping": {
-              "searchParams.type": [["set", { "value": "rabbit" }]],
-              "searchParams.status": [["set", { "value": "adoptable" }]],
-              "searchParams.limit": [["set", { "value": 1 }]],
+              "searchParams.type": [
+                [
+                  "set",
+                  {
+                    "value": "rabbit"
+                  }
+                ]
+              ],
+              "searchParams.status": [
+                [
+                  "set",
+                  {
+                    "value": "adoptable"
+                  }
+                ]
+              ],
+              "searchParams.limit": [
+                [
+                  "set",
+                  {
+                    "value": 1
+                  }
+                ]
+              ],
               "searchParams.page": [
                 [
-                  "expression",
-                  { "expression": "random(1, 2000)" }
+                  "expressionEval",
+                  {
+                    "expression": "random(1, 2000)"
+                  }
                 ]
               ]
             },
@@ -42,19 +66,19 @@
             "argsMapping": {
               "form.Body": [
                 [
-                  "expression",
+                  "expressionEval",
                   {
-                    "expression": "format('Meet %s! Adopt this bunny at: %s', get('random-animal.animals[0].name', results), get('random-animal.animals[0].url', results))"
+                    "expression": "format('Meet %s! Adopt this bunny at: %s', get('random-rabbit.animals[0].name', results), get('random-rabbit.animals[0].url', results))"
                   }
                 ]
               ],
-              "form.From": [["set", { "value": "+12013899312" }]],
-              "form.To": [["get", { "path": "args.phone" }]],
+              "form.From": [["set", {"value": "args.from"}]],
+              "form.To": [["get", {"path": "args.to"}]],
               "form.MediaUrl": [
                 [
                   "get",
                   {
-                    "path": "results.random-animal.animals[0].photos[0].large"
+                    "path": "results.random-rabbit.animals[0].photos[0].large"
                   }
                 ]
               ]
@@ -77,14 +101,14 @@
       "schema": {
         "type": "object",
         "properties": {
-          "bunny": {
+          "rabbit": {
             "type": "object",
             "properties": {
               "name": {
                 "type": "string"
               },
               "description": {
-                "type": "string" 
+                "type": "string"
               },
               "age": {
                 "type": "string"
@@ -111,7 +135,7 @@
               },
               "status": {
                 "type": "string"
-              }         
+              }
             }
           }
         }
@@ -124,34 +148,37 @@
       "schema": {
         "type": "object",
         "properties": {
-          "phone": {
+          "to": {
             "type": "string"
-          }
+          },
+          "from": {
+            "type": "string"
+          }          
         }
       }
     }
   },
-  "created": "2017-07-13T19:16:10.801Z",
-  "updated": "2020-11-02T19:18:41.453Z",
+  "workflows": {},
   "forms": {},
   "services": {
-    "twilio": {
-      "params": {
-        "endpoint": "https://api.twilio.com/2010-04-01/Accounts/",
-        "namespace": "Twilio",
-        "name": "twilio",
-        "type": "rest",
-        "authType": "basic"
+    "petfinder": {
+      "id": "petfinder",
+      "provider": "petfinder",
+      "title": "Petfinder",
+      "namespace": "Petfinder",
+      "serviceType": "rest",
+      "authenticationType": "oauth2",
+      "options": {
+        "endpoint": "https://api.petfinder.com/v2/"
       }
     },
-    "petfinder": {
-      "params": {
-        "endpoint": "https://api.petfinder.com/v2",
-        "namespace": "Petfinder",
-        "name": "petfinder",
-        "type": "rest",
-        "authType": "none"
-      }
+    "twilio": {
+      "id": "twilio",
+      "provider": "generic",
+      "title": "Twilio",
+      "namespace": "Twilio",
+      "serviceType": "rest",
+      "authenticationType": "basic"
     }
   }
 }
