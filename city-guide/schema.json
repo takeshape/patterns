@@ -1,19 +1,41 @@
 {
-  "workflows": {},
   "apiVersion": "2",
-  "defaultLocale": "en",
-  "locales": ["en"],
-  "projectId": "90ddca81-5e73-44a9-af20-c2555cebf7e9",
-  "version": 4,
-  "schemaVersion": "3",
+  "projectId": "",
+  "version": 1,
+  "created": "2021-05-04T20:34:20.820Z",
+  "updated": "2021-05-05T14:54:51.378Z",
+  "defaultLocale": "en-us",
+  "locales": ["en-us"],
+  "schemaVersion": "3.1.0",
   "queries": {
-    "getLocation": {
-      "shape": "IPLookupResult",
+    "getCityGuide": {
+      "shape": "CityGuide",
       "resolver": {
         "resultsMapping": {
-          "location": [["get", { "path": "results.location" }]],
-          "weather": [["get", { "path": "results.weather" }]],
-          "business": [["get", { "path": "results.yelp.business" }]]
+          "location": [
+            [
+              "get",
+              {
+                "path": "results.location"
+              }
+            ]
+          ],
+          "weather": [
+            [
+              "get",
+              {
+                "path": "results.weather"
+              }
+            ]
+          ],
+          "businessList": [
+            [
+              "get",
+              {
+                "path": "results.yelp.business"
+              }
+            ]
+          ]
         },
         "compose": [
           {
@@ -21,7 +43,7 @@
             "name": "rest:get",
             "service": "ip-api",
             "options": {
-              "path": "json/:ip"
+              "path": "json/{ip}"
             },
             "argsMapping": {
               "pathParams.ip": [
@@ -49,8 +71,22 @@
             "name": "rest:get",
             "service": "openweathermap",
             "argsMapping": {
-              "searchParams.zip": [["get", { "path": "results.location.zip" }]],
-              "searchParams.units": [["set", { "value": "imperial" }]]
+              "searchParams.zip": [
+                [
+                  "get",
+                  {
+                    "path": "results.location.zip"
+                  }
+                ]
+              ],
+              "searchParams.units": [
+                [
+                  "set",
+                  {
+                    "value": "imperial"
+                  }
+                ]
+              ]
             },
             "options": {
               "path": "weather"
@@ -61,9 +97,30 @@
             "name": "graphql:query",
             "service": "yelp",
             "argsMapping": {
-              "location": [["get", { "path": "results.location.zip" }]],
-              "term": [["set", { "value": "restaurant" }]],
-              "limit": [["set", { "value": 5 }]]
+              "location": [
+                [
+                  "get",
+                  {
+                    "path": "results.location.zip"
+                  }
+                ]
+              ],
+              "term": [
+                [
+                  "set",
+                  {
+                    "value": "restaurant"
+                  }
+                ]
+              ],
+              "limit": [
+                [
+                  "set",
+                  {
+                    "value": 5
+                  }
+                ]
+              ]
             },
             "options": {
               "fieldName": "search",
@@ -72,16 +129,16 @@
           }
         ]
       },
-      "description": "Returns a location.",
-      "args": "LocationInput"
+      "description": "Returns a city guide for an IP address.",
+      "args": "CityGuideInput"
     }
   },
   "mutations": {},
   "shapes": {
-    "LocationInput": {
-      "id": "LocationInput",
-      "name": "LocationInput",
-      "title": "LocationInput",
+    "CityGuideInput": {
+      "id": "CityGuideInput",
+      "name": "CityGuideInput",
+      "title": "CityGuideInput",
       "schema": {
         "type": "object",
         "properties": {
@@ -199,36 +256,17 @@
         }
       }
     },
-    "YelpSearchResult": {
-      "id": "YelpSearchResult",
-      "name": "YelpSearchResult",
-      "title": "YelpSearchResult",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "total": {
-            "type": "number"
-          },
-          "business": {
-            "type": "array",
-            "items": {
-              "@ref": "local:Business"
-            }
-          }
-        }
-      }
-    },
-    "IPLookupResult": {
-      "id": "IPLookupResult",
-      "name": "IPLookupResult",
-      "title": "IPLookupResult",
+    "CityGuide": {
+      "id": "CityGuide",
+      "name": "CityGuide",
+      "title": "CityGuide",
       "schema": {
         "type": "object",
         "properties": {
           "location": {
             "@ref": "local:Location"
           },
-          "business": {
+          "businessList": {
             "type": "array",
             "items": {
               "@ref": "local:Business"
@@ -241,43 +279,40 @@
       }
     }
   },
-  "created": "2017-07-13T19:16:10.801Z",
-  "updated": "2020-11-02T19:18:41.453Z",
+  "workflows": {},
   "forms": {},
   "services": {
-    "googleplaces": {
-      "params": {
-        "endpoint": "https://maps.googleapis.com/maps/api/place",
-        "namespace": "GooglePlaces",
-        "name": "googleplaces",
-        "type": "rest",
-        "authType": "searchParams",
-        "authProp": "key"
-      }
-    },
     "yelp": {
-      "params": {
-        "endpoint": "https://api.yelp.com/v3/graphql",
-        "namespace": "Yelp",
-        "name": "yelp",
-        "type": "graphql"
-      }
-    },
-    "openweathermap": {
-      "params": {
-        "type": "rest",
-        "name": "openweathermap",
-        "endpoint": "https://api.openweathermap.org/data/2.5",
-        "authType": "searchParams",
-        "authProp": "appid"
+      "id": "yelp",
+      "provider": "generic",
+      "title": "Yelp",
+      "namespace": "Yelp",
+      "serviceType": "graphql",
+      "authenticationType": "bearer",
+      "options": {
+        "endpoint": "https://api.yelp.com/v3/graphql"
       }
     },
     "ip-api": {
-      "params": {
-        "authType": "none",
-        "name": "ip-api",
-        "type": "rest",
-        "endpoint": "http://ip-api.com/"
+      "id": "ip-api",
+      "provider": "generic",
+      "title": "ip-api",
+      "namespace": "IPApi",
+      "serviceType": "rest",
+      "authenticationType": "none",
+      "options": {
+        "endpoint": "http://ip-api.com"
+      }
+    },
+    "openweathermap": {
+      "id": "openweathermap",
+      "provider": "generic",
+      "title": "OpenWeatherMap",
+      "namespace": "OpenWeatherMap",
+      "serviceType": "rest",
+      "authenticationType": "searchParams",
+      "options": {
+        "endpoint": "https://api.openweathermap.org/data/2.5"
       }
     }
   }
