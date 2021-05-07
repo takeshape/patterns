@@ -11,6 +11,14 @@ IP address.
 - [OpenWeather](https://openweathermap.org/current)
 - [Yelp](https://www.yelp.com/developers/documentation/v3/get_started)
 
+## Setup
+
+1. [Deploy this pattern][deployUrl] to a new TakeShape project
+2. Add your own authentication data to the service objects provided by the pattern:
+   1. Yelp requires a bearer token
+   2. OpenWeatherMap requires an API key identified by the query params `appid`.
+3. Run the query below in the API Explorer, using one of the provided IPs or another IP.
+
 ## Story
 
 Using IP-API we first attempt to geolocate the user based on IP. If we were building
@@ -50,3 +58,5 @@ query GetLocation {
   }
 }
 ```
+
+[deployUrl]: https://app.takeshape.io/add-to-takeshape?repo=https://github.com/takeshape/patterns/tree/main/city-guide
