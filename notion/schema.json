@@ -1,0 +1,219 @@
+{
+  "schemaVersion": "3.9.0",
+  "queries": {
+    "queryDatabase": {
+      "resolver": {
+        "name": "rest:post",
+        "service": "notion",
+        "path": {
+          "ops": [{"path": "id", "mapping": "$args.id"}],
+          "serialize": {
+            "template": "databases/{id}/query",
+            "defaults": {"style": "simple", "explode": false}
+          }
+        }
+      },
+      "args": {
+        "type": "object",
+        "properties": {"id": {"type": "string"}},
+        "required": ["id"]
+      },
+      "shape": "PageList"
+    },
+    "getDatabase": {
+      "resolver": {
+        "name": "rest:get",
+        "service": "notion",
+        "path": {
+          "ops": [{"path": "id", "mapping": "$args.id"}],
+          "serialize": {
+            "template": "/databases/{id}",
+            "defaults": {"style": "simple", "explode": false}
+          }
+        }
+      },
+      "args": {
+        "type": "object",
+        "properties": {"id": {"type": "string"}},
+        "required": ["id"]
+      },
+      "shape": "Database"
+    }
+  },
+  "mutations": {},
+  "shapes": {
+    "File": {
+      "id": "File",
+      "name": "File",
+      "title": "File",
+      "description": "File objects contain data about files uploaded to Notion as well as external files linked in Notion.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of this file object. Possible values are: \"external\", \"file\"."
+          },
+          "url": {"type": "string"},
+          "expiry_time": {"type": "string"}
+        }
+      }
+    },
+    "Emoji": {
+      "id": "Emoji",
+      "name": "Emoji",
+      "title": "Emoji",
+      "description": "Emoji objects contain emoji data for page icons.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of this file object. Possible values are: \"emoji\"."
+          },
+          "emoji": {"type": "string", "description": "Emoji character."}
+        }
+      }
+    },
+    "RichText": {
+      "id": "RichText",
+      "name": "RichText",
+      "title": "Rich Text",
+      "description": "Rich text objects contain data for displaying formatted text, mentions, and equations. A rich text object also contains annotations for style information. Arrays of rich text objects are used within property objects and property value objects to create what a user sees as a single text value in Notion.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of this rich text object. Possible values are: \"text\", \"mention\", \"equation\"."
+          },
+          "plain_text": {
+            "type": "string",
+            "description": "The plain text without annotations."
+          },
+          "href": {
+            "type": "string",
+            "description": "The URL of any link or internal Notion mention in this text, if any."
+          },
+          "annotations": {
+            "type": "object",
+            "properties": {
+              "bold": {"type": "boolean"},
+              "italic": {"type": "boolean"},
+              "strikethrough": {"type": "boolean"},
+              "underline": {"type": "boolean"},
+              "code": {"type": "boolean"},
+              "color": {"type": "string"}
+            }
+          },
+          "content": {"type": "string"},
+          "link": {"type": "string"},
+          "expression": {"type": "string"}
+        }
+      }
+    },
+    "Database": {
+      "id": "Database",
+      "name": "Database",
+      "title": "Database",
+      "description": "A database from Notion",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "object": {"type": "string", "description": "Always `\"database\"`."},
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the database."
+          },
+          "created_time": {
+            "type": "string",
+            "description": "Date and time when this database was created. Formatted as an ISO 8601 date time string."
+          },
+          "last_edited_time": {
+            "type": "string",
+            "description": "Date and time when this database was updated. Formatted as an ISO 8601 date time string."
+          },
+          "title": {"type": "array", "items": {"@ref": "local:RichText"}},
+          "icon": {"oneOf": [{"@ref": "local:Emoji"}, {"@ref": "local:File"}]}
+        }
+      }
+    },
+    "Page": {
+      "id": "Page",
+      "name": "Page",
+      "title": "Page",
+      "description": "The Page object contains the property values of a single Notion page.\n\nAll pages have a parent. If the parent is a database, the property values conform to the schema laid out database's properties. Otherwise, the only property value is the title.\n\nPage content is available as blocks. The content can be read using retrieve block children and appended using append block children.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "description": "Always \"page\"."
+          },
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the page."
+          },
+          "created_time": {
+            "type": "string",
+            "description": "Date and time when this page was created. Formatted as an ISO 8601 date time string."
+          },
+          "last_edited_time": {
+            "type": "string",
+            "description": "Date and time when this page was updated. Formatted as an ISO 8601 date time string."
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "The archived status of the page."
+          },
+          "icon": {
+            "oneOf": [{"@ref": "local:Emoji"}, {"@ref": "local:File"}],
+            "description": "Page icon."
+          },
+          "cover": {
+            "@ref": "local:File",
+            "description": "Page cover image."
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL of the Notion page."
+          }
+        }
+      }
+    },
+    "PageList": {
+      "id": "PageList",
+      "name": "PageList",
+      "title": "PageList",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "description": "Always `list`."
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "@ref": "local:Page"
+            }
+          }
+        }
+      }
+    }
+  },
+  "services": {
+    "notion": {
+      "serviceType": "rest",
+      "provider": "notion",
+      "authenticationType": "oauth2Bearer",
+      "id": "notion",
+      "title": "Notion",
+      "namespace": "Notion",
+      "options": {
+        "endpoint": "https://api.notion.com/v1/",
+        "headers": {"Notion-Version": "2021-08-16"}
+      },
+    }
+  }
+}
