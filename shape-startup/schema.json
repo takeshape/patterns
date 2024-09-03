@@ -1,6 +1,6 @@
 {
   "workflows": {},
-  "apiVersion": "2",
+  "apiVersion": "3",
   "defaultLocale": "en",
   "locales": ["en"],
   "projectId": "5641116a-b73b-47eb-943d-90c3f6019d2d",
