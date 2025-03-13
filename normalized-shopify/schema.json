@@ -1,0 +1,409 @@
+{
+  "queries": {
+    "Stripe_listNormalizedProducts": {
+      "shape": "Stripe_ListNormalizedProductsResponse",
+      "resolver": {
+        "name": "rest:get",
+        "service": "stripe",
+        "path": "/v1/products",
+        "searchParams": {
+          "ops": [
+            {
+              "path": "active",
+              "mapping": "$args.active"
+            },
+            {
+              "path": "created",
+              "mapping": "$args.created"
+            },
+            {
+              "path": "ending_before",
+              "mapping": "$args.ending_before"
+            },
+            {
+              "path": "expand",
+              "mapping": "$args.expand"
+            },
+            {
+              "path": "ids",
+              "mapping": "$args.ids"
+            },
+            {
+              "path": "limit",
+              "mapping": "$args.limit"
+            },
+            {
+              "path": "shippable",
+              "mapping": "$args.shippable"
+            },
+            {
+              "path": "starting_after",
+              "mapping": "$args.starting_after"
+            },
+            {
+              "path": "url",
+              "mapping": "$args.url"
+            },
+            {
+              "path": "expand",
+              "mapping": "price"
+            }
+          ],
+          "serialize": {
+            "paths": {
+              "active": {
+                "style": "form"
+              },
+              "created": {
+                "explode": true,
+                "style": "deepObject"
+              },
+              "ending_before": {
+                "style": "form"
+              },
+              "expand": {
+                "explode": true,
+                "style": "deepObject"
+              },
+              "ids": {
+                "explode": true,
+                "style": "deepObject"
+              },
+              "limit": {
+                "style": "form"
+              },
+              "shippable": {
+                "style": "form"
+              },
+              "starting_after": {
+                "style": "form"
+              },
+              "url": {
+                "style": "form"
+              }
+            }
+          }
+        },
+        "results": {
+          "ops": [
+            {
+              "path": "$",
+              "mapping": "$finalResolver"
+            },
+            {
+              "path": "data[*]",
+              "ops": [
+                {
+                  "path": "_id",
+                  "mapping": [
+                    [
+                      "get",
+                      {
+                        "path": "$parent.$value.id"
+                      }
+                    ],
+                    [
+                      "format",
+                      {
+                        "template": "tid://local:Product~stripe%s"
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "path": "title",
+                  "mapping": "$parent.$value.name"
+                },
+                {
+                  "path": "price",
+                  "mapping": "$parent.$value.default_price.unit_amount"
+                },
+                {
+                  "path": "imageUrl",
+                  "mapping": "$parent.$value.images[0]"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "description": "List all products",
+      "args": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "description": "Only return products that are active or inactive (e.g., pass `false` to list all inactive products).",
+            "type": "boolean"
+          },
+          "created": {},
+          "ending_before": {
+            "maxLength": 5000,
+            "description": "A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 100 objects, starting with `obj_bar`, your subsequent call can include `ending_before=obj_bar` in order to fetch the previous page of the list.",
+            "type": "string"
+          },
+          "expand": {
+            "description": "Specifies wh ich fields in the response should be expanded.",
+            "type": "array",
+            "items": {
+              "maxLength": 5000,
+              "type": "string"
+            }
+          },
+          "ids": {
+            "description": "Only return products with the given IDs. Cannot be used with [starting_after](https://stripe.com/docs/api#list_products-starting_after) or [ending_before](https://stripe.com/docs/api#list_products-ending_before).",
+            "type": "array",
+            "items": {
+              "maxLength": 5000,
+              "type": "string"
+            }
+          },
+          "limit": {
+            "description": "A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.",
+            "type": "integer"
+          },
+          "shippable": {
+            "description": "Only return products that can be shipped (i.e., physical, not digital products).",
+            "type": "boolean"
+          },
+          "starting_after": {
+            "maxLength": 5000,
+            "description": "A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 100 objects, ending with `obj_foo`, your subsequent call can include `starting_after=obj_foo` in order to fetch the next page of the list.",
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 5000,
+            "description": "Only return products with the given url.",
+            "type": "string"
+          }
+        },
+        "required": []
+      }
+    },
+    "Shopify_normalizedProducts": {
+      "resolver": {
+        "compose": [
+          {
+            "name": "graphql:query",
+            "service": "shopify",
+            "fieldName": "products",
+            "options": {
+              "selectionSet": "{nodes{id title priceRangeV2{minVariantPrice{amount}}description featuredMedia{preview{image{url}}}}pageInfo{endCursor hasNextPage}}"
+            },
+            "results": {
+              "ops": [
+                {
+                  "path": "$",
+                  "mapping": "$currentResolver"
+                },
+                {
+                  "path": "nodes[*]",
+                  "ops": [
+                    {
+                      "path": "_id",
+                      "mapping": [
+                        [
+                          "get",
+                          {
+                            "path": "$parent.$value.id"
+                          }
+                        ],
+                        [
+                          "format",
+                          {
+                            "template": "tid://local:Product~%s"
+                          }
+                        ]
+                      ]
+                    },
+                    {
+                      "path": "imageUrl",
+                      "mapping": "$parent.$value.featuredMedia.preview.image.url"
+                    },
+                    {
+                      "path": "price",
+                      "mapping": "$parent.$value.priceRangeV2.minVariantPrice.amount"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "first": {
+            "type": "integer",
+            "description": "The first `n` elements from the [paginated list](https://shopify.dev/api/usage/pagination-graphql)."
+          },
+          "after": {
+            "type": "string",
+            "description": "The elements that come after the specified [cursor](https://shopify.dev/api/usage/pagination-graphql)."
+          },
+          "last": {
+            "type": "integer",
+            "description": "The last `n` elements from the [paginated list](https://shopify.dev/api/usage/pagination-graphql)."
+          },
+          "before": {
+            "type": "string",
+            "description": "The elements that come before the specified [cursor](https://shopify.dev/api/usage/pagination-graphql)."
+          },
+          "reverse": {
+            "type": "boolean",
+            "description": "Reverse the order of the underlying list.",
+            "default": false
+          },
+          "sortKey": {
+            "@ref": "shopify:ProductSortKeys",
+            "description": "Sort the underlying list using a key. If your query is slow or returns an error, then [try specifying a sort key that matches the field used in the search](https://shopify.dev/api/usage/pagination-graphql#search-performance-considerations).",
+            "default": "ID"
+          },
+          "query": {
+            "type": "string",
+            "description": "A filter made up of terms, connectives, modifiers, and comparators.\n| name | type | description | acceptable_values | default_value | example_use |\n| ---- | ---- | ---- | ---- | ---- | ---- |\n| default | string | Filter by a case-insensitive search of multiple fields in a document. | | | - `query=Bob Norman`<br/> - `query=title:green hoodie` |\n| barcode | string | Filter by the product variant [`barcode`](https://shopify.dev/api/admin-graphql/latest/objects/ProductVariant#field-barcode) field. | | | - `barcode:ABC-abc-1234` |\n| bundles | boolean | Filter by a [product bundle](https://shopify.dev/docs/apps/build/product-merchandising/bundles). A product bundle is a set of two or more related products, which are commonly offered at a discount. | | | - `bundles:true` |\n| category_id | string | Filter by the product [category ID](https://shopify.dev/api/admin-graphql/latest/objects/Product#field-category) (`product.category.id`). A product category is the category of a product from [Shopify's Standard Product Taxonomy](https://shopify.github.io/product-taxonomy/releases/unstable/?categoryId=sg-4-17-2-17). | | | - `category_id:sg-4-17-2-17` |\n| collection_id | id | Filter by the collection [`id`](https://shopify.dev/api/admin-graphql/latest/objects/Collection#field-id) field. | | | - `collection_id:108179161409` |\n| combined_listing_role | string | Filter by the role of the product in a [combined listing](https://shopify.dev/apps/build/product-merchandising/combined-listings). | - `parent`<br/> - `child`<br/> - `no_role` | | - `combined_listing_role:parent` |\n| created_at | time | Filter by the date and time when the product was created. | | | - `created_at:>'2020-10-21T23:39:20Z'`<br/> - `created_at:<now`<br/> - `created_at:<='2024'` |\n| delivery_profile_id | id | Filter by the delivery profile [`id`](https://shopify.dev/api/admin-graphql/latest/objects/DeliveryProfile#field-id) field. | | | - `delivery_profile_id:108179161409` |\n| error_feedback | string | Filter by products with publishing errors. |\n| gift_card | boolean | Filter by the product [`isGiftCard`](https://shopify.dev/api/admin-graphql/latest/objects/Product#field-isgiftcard) field. | | | - `gift_card:true` |\n| handle | string | Filter by a comma-separated list of product [handles](https://shopify.dev/api/admin-graphql/latest/queries/products#argument-query-filter-handle). | | | - `handle:the-minimal-snowboard` |\n| has_only_composites | boolean | Filter by products that have only composite variants. | | | - `has_only_composites:true` |\n| has_only_default_variant | boolean | Filter by products that have only a default variant. A default variant is the only variant if no other variants are specified. | | | - `has_only_default_variant:true` |\n| has_variant_with_components | boolean | Filter by products that have variants with associated components. | | | - `has_variant_with_components:true` |\n| id | id | Filter by `id` range. | | | - `id:1234`<br/> - `id:>=1234`<br/> - `id:<=1234` |\n| inventory_total | integer | Filter by inventory count. | | | - `inventory_total:0`<br/> - `inventory_total:>150`<br/> - `inventory_total:>=200` |\n| is_price_reduced | boolean | Filter by products that have a reduced price. For more information, refer to the [`CollectionRule`](https://shopify.dev/api/admin-graphql/latest/objects/CollectionRule) object. | | | - `is_price_reduced:true` |\n| out_of_stock_somewhere | boolean | Filter by products that are out of stock in at least one location. | | | - `out_of_stock_somewhere:true` |\n| price | bigdecimal | Filter by the product variant [`price`](https://shopify.dev/api/admin-graphql/latest/objects/Productvariant#field-price) field. | | | - `price:100.57` |\n| product_configuration_owner | string | Filter by the app [`id`](https://shopify.dev/api/admin-graphql/latest/objects/App#field-id) field. | | | - `product_configuration_owner:10001` |\n| product_publication_status | string | Filter by the publishable status of the resource on a channel, such as the online store. The value is a composite of the [channel `app` ID](https://shopify.dev/api/admin-graphql/latest/objects/Channel#app-price) (`Channel.app.id`) and one of the valid values. | - `approved`<br/> - `rejected`<br/> - `needs_action`<br/> - `awaiting_review`<br/> - `published`<br/> - `demoted`<br/> - `scheduled`<br/> - `provisionally_published` | | - `publishable_status:189769876-approved` |\n| product_type | string | Filter by a comma-separated list of [product types](https://help.shopify.com/manual/products/details/product-type). | | | - `product_type:snowboard` |\n| publication_ids | string | Filter by a comma-separated list of publication IDs that are associated with the product. | | | - `publication_ids:184111530305,184111694145` |\n| publishable_status | string | Filter by the publishable status of the resource on a channel, such as the online store. The value is a composite of either the [channel `app` ID](https://shopify.dev/api/admin-graphql/latest/objects/Channel#app-price) (`Channel.app.id`) or [channel `name`](https://shopify.dev/docs/api/admin-graphql/latest/objects/Channel#field-name) and one of the valid values. | - `online_store_channel`<br/> - `published`<br/> - `unpublished`<br/> - `visible`<br/> - `unavailable`<br/> - `hidden`<br/> - `intended`<br/> - `visible` | | - `publishable_status:published`<br/> - `publishable_status:189769876:visible`<br/> - `publishable_status:pos:hidden` |\n| published_at | time | Filter by the date and time when the product was published to the online store and other sales channels. | | | - `published_at:>2020-10-21T23:39:20Z`<br/> - `published_at:<now`<br/> - `published_at:<=2024` |\n| published_status | string | Filter by the published status of the resource on a channel, such as the online store. | - `unset`<br/> - `pending`<br/> - `approved`<br/> - `not approved` | | - `published_status:approved` |\n| sku | string | Filter by the product variant [`sku`](https://shopify.dev/api/admin-graphql/latest/objects/ProductVariant#field-sku) field. [Learn more about SKUs](https://help.shopify.com/manual/products/details/sku). | | | - `sku:XYZ-12345` |\n| status | string | Filter by a comma-separated list of statuses. You can use statuses to manage inventory. Shopify only displays products with an `ACTIVE` status in online stores, sales channels, and apps. | - `ACTIVE`<br/> - `ARCHIVED`<br/> - `DRAFT` | `ACTIVE` | - `status:ACTIVE,DRAFT` |\n| tag | string | Filter objects by the `tag` field. | | | - `tag:my_tag` |\n| tag_not | string | Filter by objects that don’t have the specified tag. | | | - `tag_not:my_tag` |\n| title | string | Filter by the product [`title`](https://shopify.dev/api/admin-graphql/latest/objects/Product#field-title) field. | | | - `title:The Minimal Snowboard` |\n| updated_at | time | Filter by the date and time when the product was last updated. | | | - `updated_at:>'2020-10-21T23:39:20Z'`<br/> - `updated_at:<now`<br/> - `updated_at:<='2024'` |\n| variant_id | id | Filter by the product variant [`id`](https://shopify.dev/api/admin-graphql/latest/objects/ProductVariant#field-id) field. | | | - `variant_id:45779434701121` |\n| variant_title | string | Filter by the product variant [`title`](https://shopify.dev/api/admin-graphql/latest/objects/ProductVariant#field-title) field. | | | - `variant_title:'Special ski wax'` |\n| vendor | string | Filter by the origin or source of the product. Learn more about [vendors and managing vendor information](https://help.shopify.com/manual/products/managing-vendor-info). | | | - `vendor:Snowdevil`<br/> - `vendor:Snowdevil OR vendor:Icedevil` |\nYou can apply one or more filters to a query. Learn more about [Shopify API search syntax](https://shopify.dev/api/usage/search-syntax)."
+          },
+          "savedSearchId": {
+            "type": "string",
+            "@tag": "id",
+            "description": "The ID of a [saved search](https://shopify.dev/api/admin-graphql/latest/objects/savedsearch#field-id).\nThe search’s query string is used as the query argument."
+          }
+        }
+      },
+      "shape": "Shopify_NormalizedProductConnection"
+    }
+  },
+  "shapes": {
+    "Product": {
+      "id": "m90v39vN2",
+      "name": "Product",
+      "title": "Product",
+      "description": "Common product data model",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "imageUrl": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "price": {
+            "type": "number",
+            "title": "Price"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ]
+      }
+    },
+    "Stripe_ListNormalizedProductsResponse": {
+      "name": "Stripe_ListNormalizedProductsResponse",
+      "id": "Stripe_ListNormalizedProductsResponse",
+      "title": "ProductList",
+      "schema": {
+        "description": "",
+        "required": [
+          "data",
+          "has_more",
+          "object",
+          "url"
+        ],
+        "title": "ProductList",
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Details about each object.",
+            "type": "array",
+            "items": {
+              "@ref": "local:Product"
+            }
+          },
+          "has_more": {
+            "description": "True if this list has another page of items after this one that can be fetched.",
+            "type": "boolean"
+          },
+          "object": {
+            "@ref": "stripe:Object",
+            "description": "String representing the object's type. Objects of the same type share the same value. Always has the value `list`."
+          },
+          "url": {
+            "description": "The URL where this list can be accessed.",
+            "maxLength": 5000,
+            "pattern": "^/v1/products",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Shopify_NormalizedProductConnection": {
+      "name": "Shopify_NormalizedProductConnection",
+      "title": "Shopify_NormalizedProductConnection",
+      "id": "Shopify_NormalizedProductConnection",
+      "description": "An auto-generated type for paginating through multiple Products.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "items": {
+              "@ref": "local:Product"
+            },
+            "@mapping": "shopify:ProductConnection.nodes",
+            "description": "A list of nodes that are contained in ProductEdge. You can fetch data about an individual node, or you can follow the edges to fetch data about a collection of related nodes. At each node, you specify the fields that you want to retrieve."
+          },
+          "pageInfo": {
+            "@ref": "shopify:PageInfo",
+            "@mapping": "shopify:ProductConnection.pageInfo",
+            "description": "An object that’s used to retrieve [cursor information](https://shopify.dev/api/usage/pagination-graphql) about the current page."
+          }
+        },
+        "required": [
+          "edges",
+          "nodes",
+          "pageInfo"
+        ]
+      }
+    }
+  },
+  "services": {
+    "shopify": {
+      "id": "shopify",
+      "title": "Shopify",
+      "namespace": "Shopify",
+      "provider": "shopify",
+      "serviceType": "graphql",
+      "authenticationType": "custom",
+      "options": {
+        "apiVersion": "2025-01"
+      }
+    },
+    "stripe": {
+      "id": "stripe",
+      "title": "Stripe",
+      "provider": "stripe",
+      "serviceType": "openapi",
+      "authenticationType": "bearer",
+      "namespace": "Stripe",
+      "options": {
+        "endpoint": "https://api.stripe.com/",
+        "spec": "https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json",
+        "transformVersion": "2.0.0",
+        "useRestfulNames": true,
+        "introspectedAt": "2025-03-13T18:13:54.217Z"
+      }
+    }
+  }
+}
