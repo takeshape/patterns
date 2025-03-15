@@ -1,4 +1,6 @@
 {
+  "schemaVersion": "3.51.0",
+  "apiVersion": "2",
   "queries": {
     "Stripe_listNormalizedProducts": {
       "shape": "Stripe_ListNormalizedProductsResponse",
@@ -405,5 +407,7 @@
         "introspectedAt": "2025-03-13T18:13:54.217Z"
       }
     }
-  }
+  },
+  "workflows": {},
+  "mutations": {}
 }
